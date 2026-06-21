@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Usuário{% endblock %}
+{% block topbar_title %}Excluir Usuário{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_usuarios' %}">Usuários</a>
+<span class="separator">/</span>
+<span>Excluir</span>
+{% endblock %}
+
+{% block content %}
+<div class="delete-card card">
+  <div class="card-body" style="padding: 40px;">
+    <div class="icon-wrapper">
+      <i class="fas fa-user-times"></i>
+    </div>
+    <h2>Excluir Usuário</h2>
+    <p>
+      Tem certeza que deseja excluir o usuário <strong>{{ usuario.username }}</strong>?
+      <br>Esta ação não pode ser desfeita.
+    </p>
+    <form method="post" id="form-delete-usuario">
+      {% csrf_token %}
+      <div class="actions">
+        <a href="{% url 'painel_usuarios' %}" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger">
+          <i class="fas fa-trash"></i> Sim, Excluir
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

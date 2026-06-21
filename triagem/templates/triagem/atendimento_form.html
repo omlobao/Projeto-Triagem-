@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Atendimento" }}{% endblock %}
+{% block topbar_title %}{{ form_title|default:"Novo Atendimento" }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'atendimento_list' %}">Atendimentos</a>
+<span class="separator">/</span>
+<span>{{ form_title|default:"Novo" }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ form_title|default:"Novo Atendimento" }}</h1>
+    <p>Preencha os dados do atendimento médico</p>
+  </div>
+  <a href="{% url 'atendimento_list' %}" class="btn btn-secondary" id="btn-voltar-atendimentos">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div id="layout-container" style="display: grid; grid-template-columns: {% if triagem_obj %}1fr 1fr{% else %}1fr{% endif %}; gap: 24px; align-items: start;">
+  
+  <!-- Formulário de Atendimento -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-stethoscope" style="color: var(--primary-400); margin-right: 8px;"></i> Dados do Atendimento</h3>
+    </div>
+    <div class="card-body">
+      <form method="post" class="django-form" id="form-atendimento">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="message message-error mb-2">
+          <i class="fas fa-exclamation-circle"></i>
+          Corrija os erros abaixo para continuar.
+          {% if form.non_field_errors %}
+          <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px;">
+            {% for err in form.non_field_errors %}
+            <li>{{ err }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="form-group" {% if triagem_obj %}style="display: none;"{% endif %}>
+          <label for="id_triagem">Triagem</label>
+          {{ form.triagem }}
+          {% if form.triagem.errors %}
+          <ul class="errorlist">{% for e in form.triagem.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+          <span class="form-help">Selecione a triagem associada a este atendimento</span>
+        </div>
+
+        <div class="form-group">
+          <label for="id_medicos">Médicos Responsáveis</label>
+          {{ form.medicos }}
+          {% if form.medicos.errors %}
+          <ul class="errorlist">{% for e in form.medicos.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+          <span class="form-help">Segure Ctrl/Cmd para selecionar múltiplos médicos</span>
+        </div>
+
+        <div class="form-group">
+          <label for="id_diagnostico">Diagnóstico</label>
+          {{ form.diagnostico }}
+          {% if form.diagnostico.errors %}
+          <ul class="errorlist">{% for e in form.diagnostico.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        
+        <div class="form-group">
+          <label for="id_prescricao">Prescrição</label>
+          {{ form.prescricao }}
+          {% if form.prescricao.errors %}
+          <ul class="errorlist">{% for e in form.prescricao.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-row" style="display: none;">
+          <div class="form-group">
+            <label for="id_data_hora_fim">Data/Hora de Finalização</label>
+            {{ form.data_hora_fim }}
+            {% if form.data_hora_fim.errors %}
+            <ul class="errorlist">{% for e in form.data_hora_fim.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
+          <a href="{% url 'atendimento_list' %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary" id="btn-salvar-atendimento">
+            <i class="fas fa-save"></i> Salvar Atendimento
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Ficha de Triagem (Dinâmica ou Fixa) -->
+  <div id="triagem-card" class="card" style="display: {% if triagem_obj %}block{% else %}none{% endif %}; border-top: 4px solid var(--primary-400);">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <h3><i class="fas fa-clipboard-list" style="margin-right: 8px;"></i> Ficha de Triagem</h3>
+      <span id="t-badge" class="badge badge-teal">
+        <i class="fas fa-exclamation-triangle"></i> <span id="t-cor"></span>
+      </span>
+    </div>
+    <div class="card-body">
+      
+      <div style="display: flex; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--glass-border);">
+        <div id="t-iniciais" style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary-900); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary-400); font-weight: bold;">
+          {% if triagem_obj %}{{ triagem_obj.paciente.nome|make_list|first }}{{ triagem_obj.paciente.sobrenome|make_list|first }}{% endif %}
+        </div>
+        <div>
+          <h4 id="t-nome" style="margin: 0 0 4px 0; color: #fff;">
+            {% if triagem_obj %}{{ triagem_obj.paciente.nome }} {{ triagem_obj.paciente.sobrenome }}{% endif %}
+          </h4>
+          <div class="text-sm text-muted">
+            <i class="fas fa-id-card"></i> CPF: <span id="t-cpf">{% if triagem_obj %}{{ triagem_obj.paciente.cpf }}{% endif %}</span> | 
+            <i class="fas fa-birthday-cake"></i> <span id="t-nascimento">{% if triagem_obj %}{{ triagem_obj.paciente.data_nascimento|date:"d/m/Y" }}{% endif %}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+        <div class="detail-item" style="border: none; padding: 0;">
+          <div class="detail-label"><i class="fas fa-heartbeat" style="color: var(--rose);"></i> Pressão Arterial</div>
+          <div id="t-pressao" class="detail-value" style="font-size: 1.2rem; margin-top: 4px;">{% if triagem_obj %}{{ triagem_obj.pressao_arterial }}{% endif %}</div>
+        </div>
+        <div class="detail-item" style="border: none; padding: 0;">
+          <div class="detail-label"><i class="fas fa-lungs" style="color: var(--info);"></i> Saturação O2</div>
+          <div class="detail-value" style="font-size: 1.2rem; margin-top: 4px;"><span id="t-saturacao">{% if triagem_obj %}{{ triagem_obj.saturacao }}{% endif %}</span>%</div>
+        </div>
+        <div class="detail-item" style="border: none; padding: 0;">
+          <div class="detail-label"><i class="fas fa-weight" style="color: var(--teal);"></i> Peso</div>
+          <div class="detail-value" style="font-size: 1.2rem; margin-top: 4px;"><span id="t-peso">{% if triagem_obj %}{{ triagem_obj.peso }}{% endif %}</span> kg</div>
+        </div>
+        <div class="detail-item" style="border: none; padding: 0;">
+          <div class="detail-label"><i class="fas fa-ruler-vertical" style="color: var(--amber);"></i> Altura</div>
+          <div class="detail-value" style="font-size: 1.2rem; margin-top: 4px;"><span id="t-altura">{% if triagem_obj %}{{ triagem_obj.altura }}{% endif %}</span> m</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <div class="detail-label" style="margin-bottom: 8px;"><i class="fas fa-head-side-cough"></i> Sintomas Relatados</div>
+        <div id="t-sintomas" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); line-height: 1.6;">
+          {% if triagem_obj %}{{ triagem_obj.sintomas|linebreaksbr }}{% endif %}
+        </div>
+      </div>
+
+      <div id="container-observacoes" style="margin-bottom: 24px; display: {% if triagem_obj and triagem_obj.observacoes %}block{% else %}none{% endif %};">
+        <div class="detail-label" style="margin-bottom: 8px;"><i class="fas fa-comment-medical"></i> Observações da Enfermagem</div>
+        <div id="t-observacoes" style="background: rgba(234, 179, 8, 0.1); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(234, 179, 8, 0.2); line-height: 1.6; color: var(--slate-100);">
+          {% if triagem_obj %}{{ triagem_obj.observacoes|linebreaksbr }}{% endif %}
+        </div>
+      </div>
+
+      <div class="text-sm text-muted" style="border-top: 1px dashed var(--glass-border); padding-top: 16px;">
+        Triagem realizada por <strong id="t-enfermeiro">{% if triagem_obj %}{{ triagem_obj.enfermeiro.nome }} {{ triagem_obj.enfermeiro.sobrenome }}{% endif %}</strong> 
+        (COREN: <span id="t-coren">{% if triagem_obj %}{{ triagem_obj.enfermeiro.coren }}{% endif %}</span>) 
+        em <span id="t-data">{% if triagem_obj %}{{ triagem_obj.data_triagem|date:"d/m/Y" }}{% endif %}</span>.
+      </div>
+
+    </div>
+  </div>
+  
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const selectTriagem = document.getElementById('id_triagem');
+  const layoutContainer = document.getElementById('layout-container');
+  const triagemCard = document.getElementById('triagem-card');
+  
+  // Elementos da ficha para preencher
+  const tBadge = document.getElementById('t-badge');
+  const tCor = document.getElementById('t-cor');
+  const tIniciais = document.getElementById('t-iniciais');
+  const tNome = document.getElementById('t-nome');
+  const tCpf = document.getElementById('t-cpf');
+  const tNascimento = document.getElementById('t-nascimento');
+  const tPressao = document.getElementById('t-pressao');
+  const tSaturacao = document.getElementById('t-saturacao');
+  const tPeso = document.getElementById('t-peso');
+  const tAltura = document.getElementById('t-altura');
+  const tSintomas = document.getElementById('t-sintomas');
+  const tObservacoes = document.getElementById('t-observacoes');
+  const containerObservacoes = document.getElementById('container-observacoes');
+  const tEnfermeiro = document.getElementById('t-enfermeiro');
+  const tCoren = document.getElementById('t-coren');
+  const tData = document.getElementById('t-data');
+
+  {% if triagem_obj %}
+  // Se a triagem já veio via URL, preenchemos o select escondido
+  selectTriagem.value = "{{ triagem_obj.pk }}";
+  
+  // Ajusta a cor da borda e do badge na inicialização se existir triagem_obj
+  let cor = "{{ triagem_obj.classificacao_risco.cor|lower }}";
+  if(cor === 'vermelho' || cor === 'vermelha') {
+      triagemCard.style.borderTopColor = 'var(--danger)';
+  } else if(cor === 'laranja') {
+      triagemCard.style.borderTopColor = 'var(--warning)';
+  } else if(cor === 'amarelo' || cor === 'amarela') {
+      triagemCard.style.borderTopColor = 'var(--yellow)';
+  } else if(cor === 'verde') {
+      triagemCard.style.borderTopColor = 'var(--success)';
+  } else if(cor === 'azul') {
+      triagemCard.style.borderTopColor = 'var(--info)';
+  }
+  
+  {% endif %}
+
+  if (selectTriagem) {
+    selectTriagem.addEventListener('change', function() {
+      const triagemId = this.value;
+      if (!triagemId) {
+        layoutContainer.style.gridTemplateColumns = '1fr';
+        triagemCard.style.display = 'none';
+        return;
+      }
+
+      fetch(`/api/triagem/${triagemId}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) return;
+
+          // Exibe o layout de duas colunas
+          layoutContainer.style.gridTemplateColumns = '1fr 1fr';
+          triagemCard.style.display = 'block';
+
+          // Preenche os dados
+          tCor.textContent = data.classificacao_cor;
+          tIniciais.textContent = data.paciente_iniciais;
+          tNome.textContent = data.paciente_nome;
+          tCpf.textContent = data.paciente_cpf;
+          tNascimento.textContent = data.paciente_nascimento;
+          tPressao.textContent = data.pressao_arterial;
+          tSaturacao.textContent = data.saturacao;
+          tPeso.textContent = data.peso;
+          tAltura.textContent = data.altura;
+          tSintomas.innerHTML = data.sintomas.replace(/\n/g, '<br>');
+          tEnfermeiro.textContent = data.enfermeiro;
+          tCoren.textContent = data.enfermeiro_coren;
+          tData.textContent = data.data_triagem;
+
+          if (data.observacoes) {
+            tObservacoes.innerHTML = data.observacoes.replace(/\n/g, '<br>');
+            containerObservacoes.style.display = 'block';
+          } else {
+            containerObservacoes.style.display = 'none';
+          }
+
+          // Ajusta as cores baseado na classificação
+          const cssCor = data.classificacao_cor_css;
+          tBadge.className = 'badge';
+          
+          if(cssCor === 'vermelho' || cssCor === 'vermelha') {
+              tBadge.classList.add('badge-red');
+              triagemCard.style.borderTopColor = 'var(--danger)';
+          } else if(cssCor === 'laranja') {
+              tBadge.classList.add('badge-orange');
+              triagemCard.style.borderTopColor = 'var(--warning)';
+          } else if(cssCor === 'amarelo' || cssCor === 'amarela') {
+              tBadge.classList.add('badge-yellow');
+              triagemCard.style.borderTopColor = 'var(--yellow)';
+          } else if(cssCor === 'verde') {
+              tBadge.classList.add('badge-green');
+              triagemCard.style.borderTopColor = 'var(--success)';
+          } else if(cssCor === 'azul') {
+              tBadge.classList.add('badge-blue');
+              triagemCard.style.borderTopColor = 'var(--info)';
+          } else {
+              tBadge.classList.add('badge-teal');
+              triagemCard.style.borderTopColor = 'var(--primary-400)';
+          }
+        });
+    });
+    
+    // Dispara o evento change para carregar os dados se o select já tiver valor (quando der erro de form por exemplo)
+    {% if not triagem_obj %}
+    if (selectTriagem.value) {
+        selectTriagem.dispatchEvent(new Event('change'));
+    }
+    {% endif %}
+  }
+});
+</script>
+{% endblock %}

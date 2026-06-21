@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Classificações de Risco{% endblock %}
+{% block topbar_title %}Classificações de Risco{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<span>Classificações</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Classificações de Risco</h1>
+    <p>Gerenciar os níveis de classificação</p>
+  </div>
+  <a href="{% url 'painel_classificacao_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Nova Classificação
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Cor</th><th>Prioridade</th><th>Tempo Máx. (min)</th><th>Descrição</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for c in classificacoes %}
+          <tr>
+            <td>
+              <span class="badge badge-{% if c.cor|lower == 'vermelho' or c.cor|lower == 'vermelha' %}red{% elif c.cor|lower == 'laranja' %}orange{% elif c.cor|lower == 'amarelo' or c.cor|lower == 'amarela' %}yellow{% elif c.cor|lower == 'verde' %}green{% elif c.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+                <i class="fas fa-circle" style="font-size: 0.5rem;"></i> {{ c.cor }}
+              </span>
+            </td>
+            <td><strong>{{ c.prioridade }}</strong></td>
+            <td>{{ c.tempo_max_atendimento }} min</td>
+            <td>{{ c.descricao|truncatewords:15 }}</td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_classificacao_update' c.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'painel_classificacao_delete' c.pk %}" class="btn btn-ghost btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Nenhuma classificação cadastrada</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Médicos{% endblock %}
+{% block topbar_title %}Gerenciar Médicos{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<span>Médicos</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Médicos</h1>
+    <p>Gerenciar cadastro de médicos</p>
+  </div>
+  <a href="{% url 'painel_medico_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Novo Médico
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>CPF</th><th>CRM</th><th>Especialidade</th><th>Telefone</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for m in medicos %}
+          <tr>
+            <td><strong>{{ m.nome }} {{ m.sobrenome }}</strong></td>
+            <td>{{ m.cpf }}</td>
+            <td><span class="badge badge-blue">{{ m.CRM }}</span></td>
+            <td>{{ m.especialidade }}</td>
+            <td>{{ m.telefone }}</td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_medico_update' m.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'painel_medico_delete' m.pk %}" class="btn btn-ghost btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state"><i class="fas fa-user-md"></i><h3>Nenhum médico cadastrado</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

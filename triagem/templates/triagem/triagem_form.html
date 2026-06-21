@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Triagem" }}{% endblock %}
+{% block topbar_title %}{{ form_title|default:"Nova Triagem" }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'triagem_list' %}">Triagens</a>
+<span class="separator">/</span>
+<span>{{ form_title|default:"Nova" }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ form_title|default:"Nova Triagem" }}</h1>
+    <p>Preencha os dados da triagem do paciente</p>
+  </div>
+  <a href="{% url 'triagem_list' %}" class="btn btn-secondary" id="btn-voltar-triagens">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="django-form" id="form-triagem">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="message message-error mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+        Corrija os erros abaixo para continuar.
+      </div>
+      {% endif %}
+
+      <h3 style="color: var(--slate-100); margin-bottom: 16px; font-size: 0.9rem;">
+        <i class="fas fa-user" style="color: var(--primary-400); margin-right: 6px;"></i> Paciente e Responsável
+      </h3>
+      
+      <!-- Toggle buttons for Patient Mode -->
+      <div class="patient-mode-toggle mb-3" style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <button type="button" class="btn btn-primary btn-sm" id="btn-paciente-existente">Paciente Existente</button>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-paciente-novo">Novo Paciente</button>
+      </div>
+
+      <!-- Hidden field to control mode -->
+      <div style="display: none;">{{ form.paciente_novo }}</div>
+
+      <!-- Div for existing patient dropdown -->
+      <div id="paciente-existente-div" class="form-row">
+        <div class="form-group" style="flex: 1;">
+          <label for="id_paciente">Selecionar Paciente</label>
+          {{ form.paciente }}
+          {% if form.paciente.errors %}
+          <ul class="errorlist">{% for e in form.paciente.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Div for new patient fields -->
+      <div id="paciente-novo-div" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 16px; border-radius: 8px; border: 1px dashed var(--glass-border); margin-bottom: 20px;">
+        <h4 style="margin-bottom: 16px; font-size: 0.85rem; color: var(--primary-400);">Cadastrar Novo Paciente</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_nome">Nome</label>
+            {{ form.nome }}
+            {% if form.nome.errors %}
+            <ul class="errorlist">{% for e in form.nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_sobrenome">Sobrenome</label>
+            {{ form.sobrenome }}
+            {% if form.sobrenome.errors %}
+            <ul class="errorlist">{% for e in form.sobrenome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_cpf">CPF</label>
+            {{ form.cpf }}
+            {% if form.cpf.errors %}
+            <ul class="errorlist">{% for e in form.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_data_nascimento">Data de Nascimento</label>
+            {{ form.data_nascimento }}
+            {% if form.data_nascimento.errors %}
+            <ul class="errorlist">{% for e in form.data_nascimento.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_numero_telefone">Telefone</label>
+            {{ form.numero_telefone }}
+            {% if form.numero_telefone.errors %}
+            <ul class="errorlist">{% for e in form.numero_telefone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label for="id_email">E-mail</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_enfermeiro">Enfermeiro Responsável</label>
+          {{ form.enfermeiro }}
+          {% if form.enfermeiro.errors %}
+          <ul class="errorlist">{% for e in form.enfermeiro.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
+        <i class="fas fa-heart" style="color: var(--danger); margin-right: 6px;"></i> Dados Vitais
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_peso">Peso (kg)</label>
+          {{ form.peso }}
+          {% if form.peso.errors %}
+          <ul class="errorlist">{% for e in form.peso.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_altura">Altura (m)</label>
+          {{ form.altura }}
+          {% if form.altura.errors %}
+          <ul class="errorlist">{% for e in form.altura.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_pressao_arterial">Pressão Arterial</label>
+          {{ form.pressao_arterial }}
+          {% if form.pressao_arterial.errors %}
+          <ul class="errorlist">{% for e in form.pressao_arterial.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_saturacao">Saturação (%)</label>
+          {{ form.saturacao }}
+          {% if form.saturacao.errors %}
+          <ul class="errorlist">{% for e in form.saturacao.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+
+      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
+        <i class="fas fa-notes-medical" style="color: var(--warning); margin-right: 6px;"></i> Avaliação Clínica
+      </h3>
+      <div class="form-group">
+        <label for="id_sintomas">Sintomas</label>
+        {{ form.sintomas }}
+        {% if form.sintomas.errors %}
+        <ul class="errorlist">{% for e in form.sintomas.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="id_observacoes">Observações</label>
+        {{ form.observacoes }}
+        {% if form.observacoes.errors %}
+        <ul class="errorlist">{% for e in form.observacoes.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
+        <i class="fas fa-exclamation-triangle" style="color: var(--risk-orange); margin-right: 6px;"></i> Classificação de Risco
+      </h3>
+      <div class="form-group">
+        <label for="id_classificacao_risco">Classificação</label>
+        {{ form.classificacao_risco }}
+        {% if form.classificacao_risco.errors %}
+        <ul class="errorlist">{% for e in form.classificacao_risco.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
+        <a href="{% url 'triagem_list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" id="btn-salvar-triagem">
+          <i class="fas fa-save"></i> Salvar Triagem
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const btnExistente = document.getElementById("btn-paciente-existente");
+    const btnNovo = document.getElementById("btn-paciente-novo");
+    const divExistente = document.getElementById("paciente-existente-div");
+    const divNovo = document.getElementById("paciente-novo-div");
+    const inputNovo = document.getElementById("id_paciente_novo");
+
+    // Se houver erros no form que indicam que era um form de novo paciente, restaura o estado
+    if (inputNovo && inputNovo.checked) {
+      setNovo();
+    }
+
+    btnExistente.addEventListener("click", function() {
+      setExistente();
+    });
+
+    btnNovo.addEventListener("click", function() {
+      setNovo();
+    });
+
+    function setExistente() {
+      btnExistente.classList.replace("btn-outline", "btn-primary");
+      btnNovo.classList.replace("btn-primary", "btn-outline");
+      divExistente.style.display = "flex";
+      divNovo.style.display = "none";
+      if (inputNovo) inputNovo.checked = false;
+    }
+
+    function setNovo() {
+      btnNovo.classList.replace("btn-outline", "btn-primary");
+      btnExistente.classList.replace("btn-primary", "btn-outline");
+      divNovo.style.display = "block";
+      divExistente.style.display = "none";
+      if (inputNovo) inputNovo.checked = true;
+    }
+  });
+</script>
+{% endblock %}

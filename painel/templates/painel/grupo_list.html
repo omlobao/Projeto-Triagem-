@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Grupos{% endblock %}
+{% block topbar_title %}Gerenciar Grupos{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<span>Grupos</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Grupos de Permissão</h1>
+    <p>Gerencie os grupos e suas permissões</p>
+  </div>
+  <a href="{% url 'painel_grupo_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Novo Grupo
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Usuários</th>
+            <th>Permissões</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for grupo in grupos %}
+          <tr>
+            <td class="text-muted">{{ grupo.id }}</td>
+            <td><strong>{{ grupo.name }}</strong></td>
+            <td><span class="badge badge-teal">{{ grupo.user_count }} usuários</span></td>
+            <td><span class="badge badge-blue">{{ grupo.permissions.count }} permissões</span></td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_grupo_update' grupo.pk %}" class="btn btn-ghost btn-sm" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'painel_grupo_delete' grupo.pk %}" class="btn btn-ghost btn-sm" title="Excluir" style="color: var(--danger);">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <i class="fas fa-layer-group"></i>
+                <h3>Nenhum grupo cadastrado</h3>
+                <p>Crie grupos para organizar as permissões dos usuários.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="stats-grid">
+  <div class="stat-card teal">
+    <div class="stat-icon teal">
+      <i class="fas fa-users"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Pacientes</h4>
+      <div class="value">{{ total_pacientes }}</div>
+      <div class="trend up">
+        <i class="fas fa-database"></i> Total cadastrados
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card blue">
+    <div class="stat-icon blue">
+      <i class="fas fa-heartbeat"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Triagens Hoje</h4>
+      <div class="value">{{ triagens_hoje }}</div>
+      <div class="trend up">
+        <i class="fas fa-calendar-day"></i> Realizadas hoje
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card amber">
+    <div class="stat-icon amber">
+      <i class="fas fa-stethoscope"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Atendimentos</h4>
+      <div class="value">{{ total_atendimentos }}</div>
+      <div class="trend up">
+        <i class="fas fa-clipboard-list"></i> Total realizados
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card rose">
+    <div class="stat-icon rose">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Urgentes</h4>
+      <div class="value">{{ triagens_urgentes }}</div>
+      <div class="trend down">
+        <i class="fas fa-bolt"></i> Classificação vermelha
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Triagens -->
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-clock" style="margin-right: 8px; color: var(--primary-400);"></i> Últimas Triagens</h3>
+    <a href="{% url 'triagem_list' %}" class="btn btn-sm btn-secondary" id="btn-ver-todas-triagens">
+      Ver todas <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Data</th>
+            <th>Pressão</th>
+            <th>Saturação</th>
+            <th>Classificação</th>
+            <th>Enfermeiro</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for triagem in ultimas_triagens %}
+          <tr>
+            <td><strong>{{ triagem.paciente.nome }} {{ triagem.paciente.sobrenome }}</strong></td>
+            <td>{{ triagem.data_triagem|date:"d/m/Y" }}</td>
+            <td>{{ triagem.pressao_arterial }}</td>
+            <td>{{ triagem.saturacao }}%</td>
+            <td>
+              <span class="badge badge-{% if triagem.classificacao_risco.cor|lower == 'vermelho' or triagem.classificacao_risco.cor|lower == 'vermelha' %}red{% elif triagem.classificacao_risco.cor|lower == 'laranja' %}orange{% elif triagem.classificacao_risco.cor|lower == 'amarelo' or triagem.classificacao_risco.cor|lower == 'amarela' %}yellow{% elif triagem.classificacao_risco.cor|lower == 'verde' %}green{% elif triagem.classificacao_risco.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+                <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                {{ triagem.classificacao_risco.cor }}
+              </span>
+            </td>
+            <td>{{ triagem.enfermeiro.nome }}</td>
+            <td>
+              {% if triagem.is_concluida %}
+              <span class="badge badge-green"><i class="fas fa-check-circle"></i> Concluída</span>
+              {% else %}
+              <span class="badge badge-orange"><i class="fas fa-clock"></i> Aguardando</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="flex gap-2">
+                {% if not triagem.is_concluida %}
+                <a href="{% url 'atendimento_create' %}?triagem={{ triagem.pk }}" class="btn btn-primary btn-sm" title="Atender Paciente">
+                  <i class="fas fa-stethoscope"></i> Atender
+                </a>
+                {% else %}
+                <a href="{% url 'atendimento_detail' triagem.atendimento.pk %}" class="btn btn-secondary btn-sm" title="Ver Atendimento">
+                  <i class="fas fa-file-medical-alt"></i> Ver
+                </a>
+                {% endif %}
+                <a href="{% url 'triagem_detail' triagem.pk %}" class="btn btn-ghost btn-sm" title="Detalhes Triagem">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>Nenhuma triagem registrada</h3>
+                <p>Comece criando uma nova triagem.</p>
+                <a href="{% url 'triagem_create' %}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-plus"></i> Nova Triagem
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="stats-grid mt-3">
+  <a href="{% url 'triagem_create' %}" class="stat-card teal" style="text-decoration: none; cursor: pointer;" id="quick-new-triagem">
+    <div class="stat-icon teal">
+      <i class="fas fa-plus"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Ação Rápida</h4>
+      <div class="detail-value">Nova Triagem</div>
+    </div>
+  </a>
+
+  <a href="{% url 'atendimento_create' %}" class="stat-card blue" style="text-decoration: none; cursor: pointer;" id="quick-new-atendimento">
+    <div class="stat-icon blue">
+      <i class="fas fa-file-medical"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Ação Rápida</h4>
+      <div class="detail-value">Novo Atendimento</div>
+    </div>
+  </a>
+
+  <a href="{% url 'painel_home' %}" class="stat-card amber" style="text-decoration: none; cursor: pointer;" id="quick-admin">
+    <div class="stat-icon amber">
+      <i class="fas fa-cogs"></i>
+    </div>
+    <div class="stat-info">
+      <h4>Ação Rápida</h4>
+      <div class="detail-value">Painel Admin</div>
+    </div>
+  </a>
+</div>
+{% endblock %}

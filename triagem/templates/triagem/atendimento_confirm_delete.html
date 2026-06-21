@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Atendimento{% endblock %}
+{% block topbar_title %}Excluir Atendimento{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'atendimento_list' %}">Atendimentos</a>
+<span class="separator">/</span>
+<span>Excluir</span>
+{% endblock %}
+
+{% block content %}
+<div class="delete-card card">
+  <div class="card-body" style="padding: 40px;">
+    <div class="icon-wrapper">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2>Confirmar Exclusão</h2>
+    <p>
+      Tem certeza que deseja excluir o atendimento <strong>#{{ atendimento.id }}</strong>?
+      <br>Esta ação não pode ser desfeita.
+    </p>
+    <form method="post" id="form-delete-atendimento">
+      {% csrf_token %}
+      <div class="actions">
+        <a href="{% url 'atendimento_list' %}" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger" id="btn-confirmar-exclusao-atendimento">
+          <i class="fas fa-trash"></i> Sim, Excluir
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

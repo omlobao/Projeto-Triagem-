@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Pacientes{% endblock %}
+{% block topbar_title %}Gerenciar Pacientes{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<span>Pacientes</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Pacientes</h1>
+    <p>Gerenciar cadastro de pacientes</p>
+  </div>
+  <a href="{% url 'painel_paciente_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Novo Paciente
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>CPF</th><th>Nascimento</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for p in pacientes %}
+          <tr>
+            <td><strong>{{ p.nome }} {{ p.sobrenome }}</strong></td>
+            <td>{{ p.cpf }}</td>
+            <td>{{ p.data_nascimento|date:"d/m/Y" }}</td>
+            <td>{{ p.numero_telefone }}</td>
+            <td>{{ p.email }}</td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_paciente_update' p.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'painel_paciente_delete' p.pk %}" class="btn btn-ghost btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state"><i class="fas fa-user-injured"></i><h3>Nenhum paciente cadastrado</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

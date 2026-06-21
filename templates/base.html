@@ -1,0 +1,124 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de Triagem Hospitalar — SENAI">
+  <title>{% block title %}Triagem{% endblock %} — SENAI</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <img src="{% static 'img/senai_logo.png' %}" alt="SENAI" class="sidebar-logo">
+        <div class="sidebar-brand">
+          <h2>Triagem</h2>
+          <span>Sistema Hospitalar</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="{% url 'dashboard' %}" class="nav-link" id="nav-dashboard">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+          <kbd class="nav-kbd">F4</kbd>
+        </a>
+
+        <div class="nav-section">Triagem</div>
+        <a href="{% url 'triagem_list' %}" class="nav-link" id="nav-triagem">
+          <i class="fas fa-heartbeat"></i>
+          <span>Triagens</span>
+          <kbd class="nav-kbd">F5</kbd>
+        </a>
+        <a href="{% url 'triagem_create' %}" class="nav-link" id="nav-new-triagem">
+          <i class="fas fa-plus-circle"></i>
+          <span>Nova Triagem</span>
+          <kbd class="nav-kbd">F2</kbd>
+        </a>
+
+        <div class="nav-section">Atendimento</div>
+        <a href="{% url 'atendimento_list' %}" class="nav-link" id="nav-atendimento">
+          <i class="fas fa-stethoscope"></i>
+          <span>Atendimentos</span>
+          <kbd class="nav-kbd">F6</kbd>
+        </a>
+        <a href="{% url 'atendimento_create' %}" class="nav-link" id="nav-new-atendimento">
+          <i class="fas fa-file-medical"></i>
+          <span>Novo Atendimento</span>
+          <kbd class="nav-kbd">F3</kbd>
+        </a>
+
+        <div class="nav-section">Administração</div>
+        <a href="{% url 'painel_home' %}" class="nav-link" id="nav-admin">
+          <i class="fas fa-cogs"></i>
+          <span>Painel Admin</span>
+          <kbd class="nav-kbd">F7</kbd>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar">
+            {{ user.username|make_list|first|upper }}
+          </div>
+          <div class="user-info">
+            <div class="name">{{ user.username }}</div>
+            <div class="role">{% if user.is_superuser %}Administrador{% else %}Usuário{% endif %}</div>
+          </div>
+          <a href="{% url 'logout' %}" class="btn-icon" title="Sair" id="btn-logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="btn-icon menu-toggle" id="menuToggle" type="button">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2 class="topbar-title">{% block topbar_title %}Dashboard{% endblock %}</h2>
+        </div>
+        <div class="topbar-right">
+          <div class="breadcrumb">
+            {% block breadcrumb %}
+            <a href="{% url 'dashboard' %}">Início</a>
+            {% endblock %}
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <div class="page-content fade-in">
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li class="message message-{{ message.tags }}" id="msg-{{ forloop.counter }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+            <button class="close-msg" type="button"><i class="fas fa-times"></i></button>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

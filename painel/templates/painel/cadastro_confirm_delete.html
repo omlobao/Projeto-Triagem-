@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir {{ entity_name }}{% endblock %}
+{% block topbar_title %}Excluir {{ entity_name }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<a href="{% url list_url %}">{{ entity_name }}s</a><span class="separator">/</span>
+<span>Excluir</span>
+{% endblock %}
+
+{% block content %}
+<div class="delete-card card">
+  <div class="card-body" style="padding: 40px;">
+    <div class="icon-wrapper"><i class="fas fa-exclamation-triangle"></i></div>
+    <h2>Excluir {{ entity_name }}</h2>
+    <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?<br>Esta ação não pode ser desfeita.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="actions">
+        <a href="{% url list_url %}" class="btn btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Sim, Excluir</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

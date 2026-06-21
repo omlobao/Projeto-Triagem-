@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Grupo" }}{% endblock %}
+{% block topbar_title %}{{ form_title|default:"Novo Grupo" }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_grupos' %}">Grupos</a>
+<span class="separator">/</span>
+<span>{{ form_title|default:"Novo" }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ form_title|default:"Novo Grupo" }}</h1>
+    <p>Defina o nome e as permissões do grupo</p>
+  </div>
+  <a href="{% url 'painel_grupos' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="django-form" id="form-grupo">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="message message-error mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+        Corrija os erros abaixo.
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="id_name">Nome do Grupo</label>
+        {{ form.name }}
+        {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label>Permissões</label>
+        <div style="max-height: 300px; overflow-y: auto; padding: 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); border: 1px solid var(--glass-border);">
+          {{ form.permissions }}
+        </div>
+        <span class="form-help">Selecione as permissões que este grupo deve ter</span>
+      </div>
+
+      <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
+        <a href="{% url 'painel_grupos' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Salvar Grupo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

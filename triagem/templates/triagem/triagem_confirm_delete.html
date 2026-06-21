@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Triagem{% endblock %}
+{% block topbar_title %}Excluir Triagem{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'triagem_list' %}">Triagens</a>
+<span class="separator">/</span>
+<span>Excluir</span>
+{% endblock %}
+
+{% block content %}
+<div class="delete-card card">
+  <div class="card-body" style="padding: 40px;">
+    <div class="icon-wrapper">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h2>Confirmar Exclusão</h2>
+    <p>
+      Tem certeza que deseja excluir a triagem <strong>#{{ triagem.id }}</strong> 
+      do paciente <strong>{{ triagem.paciente.nome }} {{ triagem.paciente.sobrenome }}</strong>?
+      <br>Esta ação não pode ser desfeita.
+    </p>
+    <form method="post" id="form-delete-triagem">
+      {% csrf_token %}
+      <div class="actions">
+        <a href="{% url 'triagem_list' %}" class="btn btn-secondary">
+          <i class="fas fa-times"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger" id="btn-confirmar-exclusao-triagem">
+          <i class="fas fa-trash"></i> Sim, Excluir
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

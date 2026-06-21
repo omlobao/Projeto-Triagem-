@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel Administrativo{% endblock %}
+{% block topbar_title %}Painel Administrativo{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<span>Painel</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="fas fa-shield-alt" style="color: var(--primary-400); margin-right: 8px;"></i> Painel Administrativo</h1>
+    <p>Gerencie usuários, permissões e cadastros do sistema</p>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card teal">
+    <div class="stat-icon teal"><i class="fas fa-users"></i></div>
+    <div class="stat-info">
+      <h4>Usuários</h4>
+      <div class="value">{{ total_usuarios }}</div>
+      <div class="trend up"><i class="fas fa-user-check"></i> {{ usuarios_ativos }} ativos</div>
+    </div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-icon blue"><i class="fas fa-layer-group"></i></div>
+    <div class="stat-info">
+      <h4>Grupos</h4>
+      <div class="value">{{ total_grupos }}</div>
+      <div class="trend up"><i class="fas fa-lock"></i> Permissões</div>
+    </div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-icon amber"><i class="fas fa-user-injured"></i></div>
+    <div class="stat-info">
+      <h4>Pacientes</h4>
+      <div class="value">{{ total_pacientes }}</div>
+      <div class="trend up"><i class="fas fa-database"></i> Cadastrados</div>
+    </div>
+  </div>
+  <div class="stat-card rose">
+    <div class="stat-icon rose"><i class="fas fa-heartbeat"></i></div>
+    <div class="stat-info">
+      <h4>Triagens Hoje</h4>
+      <div class="value">{{ triagens_hoje }}</div>
+      <div class="trend up"><i class="fas fa-calendar-day"></i> Realizadas</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick links grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+  <!-- Usuários & Permissões -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-users-cog" style="margin-right: 8px; color: var(--primary-400);"></i> Usuários & Permissões</h3>
+    </div>
+    <div class="card-body">
+      <a href="{% url 'painel_usuarios' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-users"></i> <span>Gerenciar Usuários</span>
+        <span class="badge badge-teal">{{ total_usuarios }}</span>
+      </a>
+      <a href="{% url 'painel_usuario_create' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-user-plus"></i> <span>Novo Usuário</span>
+      </a>
+      <a href="{% url 'painel_grupos' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-layer-group"></i> <span>Gerenciar Grupos</span>
+        <span class="badge badge-blue">{{ total_grupos }}</span>
+      </a>
+      <a href="{% url 'painel_grupo_create' %}" class="nav-link">
+        <i class="fas fa-plus-circle"></i> <span>Novo Grupo</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Cadastros -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-address-book" style="margin-right: 8px; color: var(--warning);"></i> Cadastros</h3>
+    </div>
+    <div class="card-body">
+      <a href="{% url 'painel_pacientes' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-user-injured"></i> <span>Pacientes</span>
+        <span class="badge badge-teal">{{ total_pacientes }}</span>
+      </a>
+      <a href="{% url 'painel_enfermeiros' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-user-nurse"></i> <span>Enfermeiros</span>
+        <span class="badge badge-blue">{{ total_enfermeiros }}</span>
+      </a>
+      <a href="{% url 'painel_medicos' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-user-md"></i> <span>Médicos</span>
+        <span class="badge badge-green">{{ total_medicos }}</span>
+      </a>
+      <a href="{% url 'painel_classificacoes' %}" class="nav-link">
+        <i class="fas fa-exclamation-triangle"></i> <span>Classificações de Risco</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Sistema -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-cog" style="margin-right: 8px; color: var(--info);"></i> Sistema</h3>
+    </div>
+    <div class="card-body">
+      <a href="{% url 'painel_configuracoes' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-sliders-h"></i> <span>Configurações & Atalhos</span>
+      </a>
+      <a href="{% url 'admin:index' %}" class="nav-link" style="margin-bottom: 4px;">
+        <i class="fas fa-database"></i> <span>Django Admin</span>
+      </a>
+      <div class="detail-item" style="border: none; padding: 10px 14px;">
+        <div class="detail-label">Resumo do Sistema</div>
+        <div class="detail-value text-sm">
+          {{ total_triagens }} triagens · {{ total_atendimentos }} atendimentos · {{ total_enfermeiros }} enfermeiros · {{ total_medicos }} médicos
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Últimos Usuários -->
+<div class="card mt-3">
+  <div class="card-header">
+    <h3><i class="fas fa-user-clock" style="margin-right: 8px; color: var(--primary-400);"></i> Últimos Usuários Cadastrados</h3>
+    <a href="{% url 'painel_usuarios' %}" class="btn btn-sm btn-secondary">Ver todos <i class="fas fa-arrow-right"></i></a>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Usuário</th>
+            <th>E-mail</th>
+            <th>Data de Cadastro</th>
+            <th>Status</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in ultimos_usuarios %}
+          <tr>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>{{ u.date_joined|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge badge-green"><i class="fas fa-check"></i> Ativo</span>
+              {% else %}
+                <span class="badge badge-red"><i class="fas fa-times"></i> Inativo</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.is_superuser %}
+                <span class="badge badge-red">Super</span>
+              {% elif u.is_staff %}
+                <span class="badge badge-blue">Staff</span>
+              {% else %}
+                <span class="badge badge-teal">Usuário</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

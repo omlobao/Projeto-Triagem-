@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Cadastro" }}{% endblock %}
+{% block topbar_title %}{{ form_title|default:"Novo Cadastro" }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<a href="{% url list_url %}">{{ entity_name }}s</a><span class="separator">/</span>
+<span>{{ form_title|default:"Novo" }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ form_title }}</h1>
+    <p>Preencha os dados do {{ entity_name|lower }}</p>
+  </div>
+  <a href="{% url list_url %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="django-form" id="form-cadastro">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="message message-error mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+        Corrija os erros abaixo.
+      </div>
+      {% endif %}
+
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<span class="form-help">{{ field.help_text }}</span>{% endif %}
+        {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endfor %}
+
+      <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
+        <a href="{% url list_url %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Salvar {{ entity_name }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

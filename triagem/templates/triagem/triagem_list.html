@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Triagens{% endblock %}
+{% block topbar_title %}Triagens{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<span>Triagens</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Lista de Triagens</h1>
+    <p>Gerenciar todas as triagens realizadas</p>
+  </div>
+  <a href="{% url 'triagem_create' %}" class="btn btn-primary" id="btn-nova-triagem">
+    <i class="fas fa-plus"></i> Nova Triagem
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table id="table-triagens">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Paciente</th>
+            <th>Data</th>
+            <th>Pressão</th>
+            <th>Saturação</th>
+            <th>Peso</th>
+            <th>Altura</th>
+            <th>Classificação</th>
+            <th>Enfermeiro</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for triagem in triagens %}
+          <tr>
+            <td class="text-muted">{{ triagem.id }}</td>
+            <td><strong>{{ triagem.paciente.nome }} {{ triagem.paciente.sobrenome }}</strong></td>
+            <td>{{ triagem.data_triagem|date:"d/m/Y" }}</td>
+            <td>{{ triagem.pressao_arterial }}</td>
+            <td>{{ triagem.saturacao }}%</td>
+            <td>{{ triagem.peso }} kg</td>
+            <td>{{ triagem.altura }} m</td>
+            <td>
+              <span class="badge badge-{% if triagem.classificacao_risco.cor|lower == 'vermelho' or triagem.classificacao_risco.cor|lower == 'vermelha' %}red{% elif triagem.classificacao_risco.cor|lower == 'laranja' %}orange{% elif triagem.classificacao_risco.cor|lower == 'amarelo' or triagem.classificacao_risco.cor|lower == 'amarela' %}yellow{% elif triagem.classificacao_risco.cor|lower == 'verde' %}green{% elif triagem.classificacao_risco.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+                <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+                {{ triagem.classificacao_risco.cor }}
+              </span>
+            </td>
+            <td>{{ triagem.enfermeiro.nome }}</td>
+            <td>
+              {% if triagem.is_concluida %}
+              <span class="badge badge-green"><i class="fas fa-check-circle"></i> Concluída</span>
+              {% else %}
+              <span class="badge badge-orange"><i class="fas fa-clock"></i> Aguardando</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="flex gap-2">
+                {% if not triagem.is_concluida %}
+                <a href="{% url 'atendimento_create' %}?triagem={{ triagem.pk }}" class="btn btn-primary btn-sm" title="Atender Paciente">
+                  <i class="fas fa-stethoscope"></i> Atender
+                </a>
+                {% else %}
+                <a href="{% url 'atendimento_detail' triagem.atendimento.pk %}" class="btn btn-secondary btn-sm" title="Ver Atendimento">
+                  <i class="fas fa-file-medical-alt"></i> Ver Atendimento
+                </a>
+                {% endif %}
+                <a href="{% url 'triagem_detail' triagem.pk %}" class="btn btn-ghost btn-sm" title="Ver">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'triagem_update' triagem.pk %}" class="btn btn-ghost btn-sm" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'triagem_delete' triagem.pk %}" class="btn btn-ghost btn-sm" title="Excluir" style="color: var(--danger);">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="10">
+              <div class="empty-state">
+                <i class="fas fa-heartbeat"></i>
+                <h3>Nenhuma triagem encontrada</h3>
+                <p>Clique no botão acima para criar uma nova triagem.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

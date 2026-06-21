@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuários{% endblock %}
+{% block topbar_title %}Gerenciar Usuários{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<span>Usuários</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Usuários do Sistema</h1>
+    <p>Gerencie os acessos e permissões dos usuários</p>
+  </div>
+  <a href="{% url 'painel_usuario_create' %}" class="btn btn-primary" id="btn-novo-usuario">
+    <i class="fas fa-user-plus"></i> Novo Usuário
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table id="table-usuarios">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuário</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Status</th>
+            <th>Tipo</th>
+            <th>Grupos</th>
+            <th>Último Login</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in usuarios %}
+          <tr>
+            <td class="text-muted">{{ u.id }}</td>
+            <td><strong>{{ u.username }}</strong></td>
+            <td>{{ u.first_name }} {{ u.last_name }}</td>
+            <td>{{ u.email|default:"—" }}</td>
+            <td>
+              {% if u.is_active %}
+                <span class="badge badge-green"><i class="fas fa-check"></i> Ativo</span>
+              {% else %}
+                <span class="badge badge-red"><i class="fas fa-times"></i> Inativo</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if u.is_superuser %}
+                <span class="badge badge-red">Super</span>
+              {% elif u.is_staff %}
+                <span class="badge badge-blue">Staff</span>
+              {% else %}
+                <span class="badge badge-teal">Usuário</span>
+              {% endif %}
+            </td>
+            <td>
+              {% for g in u.groups.all %}
+                <span class="badge badge-blue">{{ g.name }}</span>
+              {% empty %}
+                <span class="text-muted">—</span>
+              {% endfor %}
+            </td>
+            <td>{{ u.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_usuario_update' u.pk %}" class="btn btn-ghost btn-sm" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </a>
+                {% if u.pk != request.user.pk %}
+                <a href="{% url 'painel_usuario_delete' u.pk %}" class="btn btn-ghost btn-sm" title="Excluir" style="color: var(--danger);">
+                  <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>Nenhum usuário encontrado</h3>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

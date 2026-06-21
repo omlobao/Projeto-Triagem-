@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Atendimento #{{ atendimento.id }}{% endblock %}
+{% block topbar_title %}Detalhes do Atendimento{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'atendimento_list' %}">Atendimentos</a>
+<span class="separator">/</span>
+<span>#{{ atendimento.id }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Atendimento #{{ atendimento.id }}</h1>
+    <p>Paciente: {{ atendimento.triagem.paciente.nome }} {{ atendimento.triagem.paciente.sobrenome }}</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'atendimento_update' atendimento.pk %}" class="btn btn-secondary" id="btn-editar-atendimento">
+      <i class="fas fa-edit"></i> Editar
+    </a>
+    <a href="{% url 'atendimento_delete' atendimento.pk %}" class="btn btn-danger" id="btn-excluir-atendimento">
+      <i class="fas fa-trash"></i> Excluir
+    </a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <!-- Status -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-info-circle" style="margin-right: 8px; color: var(--info);"></i> Status</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Status</div>
+        <div class="detail-value">
+          {% if atendimento.data_hora_fim %}
+            <span class="badge badge-green"><i class="fas fa-check"></i> Concluído</span>
+          {% else %}
+            <span class="badge badge-yellow"><i class="fas fa-clock"></i> Em andamento</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Data de Início</div>
+        <div class="detail-value">{{ atendimento.data_hora_inicio|date:"d/m/Y" }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Data/Hora de Finalização</div>
+        <div class="detail-value">{{ atendimento.data_hora_fim|date:"d/m/Y H:i"|default:"Em andamento" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Triagem vinculada -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-heartbeat" style="margin-right: 8px; color: var(--primary-400);"></i> Triagem Vinculada</h3>
+      <a href="{% url 'triagem_detail' atendimento.triagem.pk %}" class="btn btn-ghost btn-sm">
+        Ver triagem <i class="fas fa-external-link-alt"></i>
+      </a>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Paciente</div>
+        <div class="detail-value">{{ atendimento.triagem.paciente.nome }} {{ atendimento.triagem.paciente.sobrenome }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Classificação de Risco</div>
+        <div class="detail-value">
+          <span class="badge badge-{% if atendimento.triagem.classificacao_risco.cor|lower == 'vermelho' or atendimento.triagem.classificacao_risco.cor|lower == 'vermelha' %}red{% elif atendimento.triagem.classificacao_risco.cor|lower == 'laranja' %}orange{% elif atendimento.triagem.classificacao_risco.cor|lower == 'amarelo' or atendimento.triagem.classificacao_risco.cor|lower == 'amarela' %}yellow{% elif atendimento.triagem.classificacao_risco.cor|lower == 'verde' %}green{% elif atendimento.triagem.classificacao_risco.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+            {{ atendimento.triagem.classificacao_risco.cor }}
+          </span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Sintomas</div>
+        <div class="detail-value">{{ atendimento.triagem.sintomas }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagnóstico -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-file-medical" style="margin-right: 8px; color: var(--success);"></i> Diagnóstico & Prescrição</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Diagnóstico</div>
+        <div class="detail-value">{{ atendimento.diagnostico }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Prescrição</div>
+        <div class="detail-value">{{ atendimento.prescricao }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Médicos -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-user-md" style="margin-right: 8px; color: var(--info);"></i> Médicos Responsáveis</h3>
+    </div>
+    <div class="card-body">
+      {% for medico in atendimento.medicos.all %}
+      <div class="detail-item">
+        <div class="detail-label">{{ medico.especialidade }}</div>
+        <div class="detail-value">Dr(a). {{ medico.nome }} {{ medico.sobrenome }} — CRM {{ medico.CRM }}</div>
+      </div>
+      {% empty %}
+      <div class="detail-item">
+        <div class="detail-value text-muted">Nenhum médico vinculado</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="mt-3">
+  <a href="{% url 'atendimento_list' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Voltar para Lista
+  </a>
+</div>
+{% endblock %}

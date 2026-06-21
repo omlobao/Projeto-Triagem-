@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Triagem #{{ triagem.id }}{% endblock %}
+{% block topbar_title %}Detalhes da Triagem{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'triagem_list' %}">Triagens</a>
+<span class="separator">/</span>
+<span>#{{ triagem.id }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Triagem #{{ triagem.id }} — {{ triagem.paciente.nome }} {{ triagem.paciente.sobrenome }}</h1>
+    <p>Realizada em {{ triagem.data_triagem|date:"d/m/Y" }}</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'triagem_update' triagem.pk %}" class="btn btn-secondary" id="btn-editar-triagem">
+      <i class="fas fa-edit"></i> Editar
+    </a>
+    <a href="{% url 'triagem_delete' triagem.pk %}" class="btn btn-danger" id="btn-excluir-triagem">
+      <i class="fas fa-trash"></i> Excluir
+    </a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <!-- Paciente -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-user" style="margin-right: 8px; color: var(--primary-400);"></i> Paciente</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Nome Completo</div>
+        <div class="detail-value">{{ triagem.paciente.nome }} {{ triagem.paciente.sobrenome }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">CPF</div>
+        <div class="detail-value">{{ triagem.paciente.cpf }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Data de Nascimento</div>
+        <div class="detail-value">{{ triagem.paciente.data_nascimento|date:"d/m/Y" }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Telefone</div>
+        <div class="detail-value">{{ triagem.paciente.numero_telefone }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dados Vitais -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-heart" style="margin-right: 8px; color: var(--danger);"></i> Dados Vitais</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Peso</div>
+        <div class="detail-value">{{ triagem.peso }} kg</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Altura</div>
+        <div class="detail-value">{{ triagem.altura }} m</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Pressão Arterial</div>
+        <div class="detail-value">{{ triagem.pressao_arterial }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Saturação</div>
+        <div class="detail-value">{{ triagem.saturacao }}%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avaliação -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-notes-medical" style="margin-right: 8px; color: var(--warning);"></i> Avaliação Clínica</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Sintomas</div>
+        <div class="detail-value">{{ triagem.sintomas }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Observações</div>
+        <div class="detail-value">{{ triagem.observacoes|default:"—" }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classificação e Enfermeiro -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: var(--risk-orange);"></i> Classificação & Responsável</h3>
+    </div>
+    <div class="card-body">
+      <div class="detail-item">
+        <div class="detail-label">Classificação de Risco</div>
+        <div class="detail-value">
+          <span class="badge badge-{% if triagem.classificacao_risco.cor|lower == 'vermelho' or triagem.classificacao_risco.cor|lower == 'vermelha' %}red{% elif triagem.classificacao_risco.cor|lower == 'laranja' %}orange{% elif triagem.classificacao_risco.cor|lower == 'amarelo' or triagem.classificacao_risco.cor|lower == 'amarela' %}yellow{% elif triagem.classificacao_risco.cor|lower == 'verde' %}green{% elif triagem.classificacao_risco.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+            {{ triagem.classificacao_risco.cor }} — {{ triagem.classificacao_risco.prioridade }}
+          </span>
+        </div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Descrição</div>
+        <div class="detail-value">{{ triagem.classificacao_risco.descricao }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Tempo Máximo de Atendimento</div>
+        <div class="detail-value">{{ triagem.classificacao_risco.tempo_max_atendimento }} minutos</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Enfermeiro Responsável</div>
+        <div class="detail-value">{{ triagem.enfermeiro.nome }} {{ triagem.enfermeiro.sobrenome }}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">COREN</div>
+        <div class="detail-value">{{ triagem.enfermeiro.coren }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-3">
+  <a href="{% url 'triagem_list' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Voltar para Lista
+  </a>
+</div>
+{% endblock %}

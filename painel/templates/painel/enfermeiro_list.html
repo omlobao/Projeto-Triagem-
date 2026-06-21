@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Enfermeiros{% endblock %}
+{% block topbar_title %}Gerenciar Enfermeiros{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a><span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a><span class="separator">/</span>
+<span>Enfermeiros</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Enfermeiros</h1>
+    <p>Gerenciar cadastro de enfermeiros</p>
+  </div>
+  <a href="{% url 'painel_enfermeiro_create' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Novo Enfermeiro
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>CPF</th><th>COREN</th><th>Telefone</th><th>E-mail</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          {% for e in enfermeiros %}
+          <tr>
+            <td><strong>{{ e.nome }} {{ e.sobrenome }}</strong></td>
+            <td>{{ e.cpf }}</td>
+            <td><span class="badge badge-teal">{{ e.coren }}</span></td>
+            <td>{{ e.telefone }}</td>
+            <td>{{ e.email }}</td>
+            <td>
+              <div class="flex gap-2">
+                <a href="{% url 'painel_enfermeiro_update' e.pk %}" class="btn btn-ghost btn-sm"><i class="fas fa-edit"></i></a>
+                <a href="{% url 'painel_enfermeiro_delete' e.pk %}" class="btn btn-ghost btn-sm" style="color: var(--danger);"><i class="fas fa-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6"><div class="empty-state"><i class="fas fa-user-nurse"></i><h3>Nenhum enfermeiro cadastrado</h3></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

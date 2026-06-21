@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ form_title|default:"Usuário" }}{% endblock %}
+{% block topbar_title %}{{ form_title|default:"Novo Usuário" }}{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_usuarios' %}">Usuários</a>
+<span class="separator">/</span>
+<span>{{ form_title|default:"Novo" }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ form_title|default:"Novo Usuário" }}</h1>
+    <p>Preencha os dados do usuário</p>
+  </div>
+  <a href="{% url 'painel_usuarios' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" class="django-form" id="form-usuario">
+      {% csrf_token %}
+
+      {% if form.errors %}
+      <div class="message message-error mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+        Corrija os erros abaixo.
+      </div>
+      {% endif %}
+
+      {% if form.non_field_errors %}
+      <div class="message message-error mb-2">
+        <i class="fas fa-exclamation-circle"></i>
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <h3 style="color: var(--slate-100); margin-bottom: 16px; font-size: 0.9rem;">
+        <i class="fas fa-user" style="color: var(--primary-400); margin-right: 6px;"></i> Dados de Acesso
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_username">Usuário</label>
+          {{ form.username }}
+          {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_email">E-mail</label>
+          {{ form.email }}
+          {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_password">{{ form.password.label }}</label>
+          {{ form.password }}
+          {% if form.password.errors %}<ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_password_confirm">{{ form.password_confirm.label }}</label>
+          {{ form.password_confirm }}
+          {% if form.password_confirm.errors %}<ul class="errorlist">{% for e in form.password_confirm.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      </div>
+
+      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
+        <i class="fas fa-id-card" style="color: var(--info); margin-right: 6px;"></i> Dados Pessoais
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_first_name">Nome</label>
+          {{ form.first_name }}
+        </div>
+        <div class="form-group">
+          <label for="id_last_name">Sobrenome</label>
+          {{ form.last_name }}
+        </div>
+      </div>
+
+      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
+        <i class="fas fa-shield-alt" style="color: var(--warning); margin-right: 6px;"></i> Permissões
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            {{ form.is_active }} Usuário ativo
+          </label>
+        </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            {{ form.is_staff }} Acesso ao painel administrativo
+          </label>
+        </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            {{ form.is_superuser }} Superusuário
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_groups">Grupos</label>
+        {{ form.groups }}
+        <span class="form-help">Segure Ctrl/Cmd para selecionar múltiplos grupos</span>
+      </div>
+
+      <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
+        <a href="{% url 'painel_usuarios' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" id="btn-salvar-usuario">
+          <i class="fas fa-save"></i> Salvar Usuário
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
