@@ -19,4 +19,5 @@ urlpatterns = [
     path('atendimento/<int:pk>/', views.AtendimentoDetailView.as_view(), name='atendimento_detail'),
     path('atendimento/<int:pk>/editar/', views.AtendimentoUpdateView.as_view(), name='atendimento_update'),
     path('atendimento/<int:pk>/excluir/', views.AtendimentoDeleteView.as_view(), name='atendimento_delete'),
+    path('atendimento/<int:pk>/imprimir/', views.atendimento_print, name='atendimento_print'),
 ]

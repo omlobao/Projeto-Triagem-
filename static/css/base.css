@@ -681,7 +681,7 @@ tbody tr:last-child td {
   margin-bottom: 6px;
 }
 
-.form-group input,
+.form-group input:not([type="checkbox"]):not([type="radio"]),
 .form-group select,
 .form-group textarea {
   width: 100%;
@@ -694,6 +694,17 @@ tbody tr:last-child td {
   font-size: 0.875rem;
   transition: var(--transition);
   outline: none;
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+  width: 20px !important;
+  height: 20px !important;
+  cursor: pointer;
+  accent-color: var(--primary-500);
+  border-radius: 4px;
+  margin: 0;
+  vertical-align: middle;
 }
 
 .form-group input:focus,
@@ -711,7 +722,7 @@ tbody tr:last-child td {
 
 .form-group textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 80px;
 }
 
 .form-group select {

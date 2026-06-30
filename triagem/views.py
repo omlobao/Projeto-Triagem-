@@ -1,9 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -11,6 +12,18 @@ from django.utils import timezone
 from .models import Triagem, Atendimento
 from .forms import TriagemForm, AtendimentoForm
 from cadastro.models import Paciente, ClassificacaoRisco
+from painel.models import ConfiguracaoHospital
+
+
+
+# ============================================
+# Authentication
+# ============================================
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, "Você saiu do sistema com sucesso.")
+    return redirect('login')
 
 
 # ============================================
@@ -133,6 +146,9 @@ def triagem_api_detail(request, pk):
             'peso': t.peso,
             'altura': t.altura,
             'sintomas': t.sintomas,
+            'alergias': t.alergias or 'Nenhuma informada',
+            'utilizou_drogas': t.utilizou_drogas,
+            'doencas_deficiencias': t.doencas_deficiencias or 'Nenhuma informada',
             'observacoes': t.observacoes,
             'enfermeiro': f"{t.enfermeiro.nome} {t.enfermeiro.sobrenome}",
             'enfermeiro_coren': t.enfermeiro.coren,
@@ -158,6 +174,15 @@ class AtendimentoListView(LoginRequiredMixin, ListView):
         return Atendimento.objects.select_related(
             'triagem', 'triagem__paciente'
         ).prefetch_related('medicos').order_by('-data_hora_inicio', '-id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['triagens_pendentes'] = Triagem.objects.filter(
+            atendimento__isnull=True
+        ).select_related(
+            'paciente', 'classificacao_risco'
+        ).order_by('classificacao_risco__tempo_max_atendimento', 'data_triagem', 'id')
+        return context
 
 
 class AtendimentoCreateView(LoginRequiredMixin, CreateView):
@@ -232,3 +257,16 @@ class AtendimentoDeleteView(LoginRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Atendimento excluído com sucesso!')
         return super().form_valid(form)
+
+
+@login_required
+def atendimento_print(request, pk):
+    atendimento = get_object_or_404(
+        Atendimento.objects.select_related(
+            'triagem', 'triagem__paciente', 'triagem__enfermeiro',
+            'triagem__classificacao_risco'
+        ).prefetch_related('medicos'),
+        pk=pk
+    )
+    config = ConfiguracaoHospital.get_solo()
+    return render(request, 'triagem/receita_print.html', {'atendimento': atendimento, 'config': config})

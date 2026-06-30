@@ -43,4 +43,7 @@ urlpatterns = [
     path('classificacoes/novo/', views.ClassificacaoCreateView.as_view(), name='painel_classificacao_create'),
     path('classificacoes/<int:pk>/editar/', views.ClassificacaoUpdateView.as_view(), name='painel_classificacao_update'),
     path('classificacoes/<int:pk>/excluir/', views.ClassificacaoDeleteView.as_view(), name='painel_classificacao_delete'),
+
+    # Configuração Hospital / Receita
+    path('hospital/', views.configuracao_hospital_update, name='painel_configuracao_hospital'),
 ]

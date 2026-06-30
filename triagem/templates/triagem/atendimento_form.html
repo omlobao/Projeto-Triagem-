@@ -144,10 +144,38 @@
         </div>
       </div>
 
-      <div style="margin-bottom: 24px;">
+      <div style="margin-bottom: 20px;">
         <div class="detail-label" style="margin-bottom: 8px;"><i class="fas fa-head-side-cough"></i> Sintomas Relatados</div>
         <div id="t-sintomas" style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); line-height: 1.6;">
           {% if triagem_obj %}{{ triagem_obj.sintomas|linebreaksbr }}{% endif %}
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <div class="detail-label" style="margin-bottom: 6px;"><i class="fas fa-allergies" style="color: var(--rose);"></i> Alergias</div>
+          <div id="t-alergias" style="background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.25); color: #fca5a5; font-size: 0.9rem;">
+            {% if triagem_obj %}{{ triagem_obj.alergias|default:"Nenhuma informada" }}{% endif %}
+          </div>
+        </div>
+        <div>
+          <div class="detail-label" style="margin-bottom: 6px;"><i class="fas fa-notes-medical" style="color: var(--info);"></i> Doenças / Deficiências</div>
+          <div id="t-doencas" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); font-size: 0.9rem;">
+            {% if triagem_obj %}{{ triagem_obj.doencas_deficiencias|default:"Nenhuma informada" }}{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <div class="detail-label" style="margin-bottom: 6px;"><i class="fas fa-wine-bottle" style="color: var(--amber);"></i> Uso Recente de Álcool/Drogas</div>
+        <div id="t-drogas">
+          {% if triagem_obj %}
+            {% if triagem_obj.utilizou_drogas %}
+              <span class="badge badge-red"><i class="fas fa-exclamation-triangle"></i> Sim relata uso</span>
+            {% else %}
+              <span class="badge badge-green"><i class="fas fa-check"></i> Não relata uso</span>
+            {% endif %}
+          {% endif %}
         </div>
       </div>
 
@@ -187,6 +215,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const tPeso = document.getElementById('t-peso');
   const tAltura = document.getElementById('t-altura');
   const tSintomas = document.getElementById('t-sintomas');
+  const tAlergias = document.getElementById('t-alergias');
+  const tDoencas = document.getElementById('t-doencas');
+  const tDrogas = document.getElementById('t-drogas');
   const tObservacoes = document.getElementById('t-observacoes');
   const containerObservacoes = document.getElementById('container-observacoes');
   const tEnfermeiro = document.getElementById('t-enfermeiro');
@@ -242,6 +273,13 @@ document.addEventListener('DOMContentLoaded', function() {
           tPeso.textContent = data.peso;
           tAltura.textContent = data.altura;
           tSintomas.innerHTML = data.sintomas.replace(/\n/g, '<br>');
+          tAlergias.textContent = data.alergias;
+          tDoencas.textContent = data.doencas_deficiencias;
+          if (data.utilizou_drogas) {
+            tDrogas.innerHTML = '<span class="badge badge-red"><i class="fas fa-exclamation-triangle"></i> Sim relata uso</span>';
+          } else {
+            tDrogas.innerHTML = '<span class="badge badge-green"><i class="fas fa-check"></i> Não relata uso</span>';
+          }
           tEnfermeiro.textContent = data.enfermeiro;
           tCoren.textContent = data.enfermeiro_coren;
           tData.textContent = data.data_triagem;

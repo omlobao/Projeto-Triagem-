@@ -1,0 +1,618 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receita Médica #{{ atendimento.id }} — {{ atendimento.triagem.paciente.nome }}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #cbd5e1;
+      --bg-toolbar: #0f172a;
+      --bg-viewport: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    body {
+      background-color: var(--bg-viewport);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Toolbar de Controle (Apenas Tela) */
+    .print-toolbar {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .toolbar-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .toolbar-info .icon-wrapper {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(13, 148, 136, 0.2);
+      border: 1px solid rgba(13, 148, 136, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2dd4bf;
+      font-size: 1.3rem;
+    }
+
+    .toolbar-info h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .toolbar-info span {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .toolbar-tip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-tip i {
+      color: #fbbf24;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-print {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+    }
+
+    .btn-print:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(13, 148, 136, 0.6);
+    }
+
+    .btn-back {
+      background: rgba(255,255,255,0.08);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .btn-back:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+
+    /* Container e Folha A4 na Tela */
+    .paper-container {
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .prescription-paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      padding: 22mm 20mm;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Cabeçalho Médico */
+    .medical-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 18px;
+      border-bottom: 3px solid var(--primary);
+      margin-bottom: 24px;
+    }
+
+    .hospital-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hospital-logo {
+      height: 60px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+
+    .hospital-text h1 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .hospital-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .prescription-badge {
+      text-align: right;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 10px 18px;
+      border-radius: 8px;
+    }
+
+    .prescription-badge h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #166534;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .prescription-badge span {
+      font-size: 0.75rem;
+      color: #15803d;
+      font-weight: 600;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Dados do Paciente e Triagem */
+    .patient-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+    }
+
+    .patient-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr 1.2fr;
+      gap: 16px;
+    }
+
+    .patient-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .patient-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .patient-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .vitals-bar {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.8rem;
+      color: #475569;
+    }
+
+    .vital-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .vital-item strong {
+      color: #0f172a;
+    }
+
+    .badge-risco {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    /* Corpo da Prescrição */
+    .prescription-body {
+      flex: 1;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+      margin-bottom: 22px;
+    }
+
+    .rx-symbol-badge {
+      font-family: 'Newsreader', serif;
+      font-size: 1.5rem;
+      font-style: italic;
+      font-weight: 600;
+      color: white;
+      background: var(--primary);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.3);
+    }
+
+    .prescription-content {
+      font-family: 'Newsreader', 'Georgia', serif;
+      font-size: 14pt;
+      line-height: 1.95;
+      color: #0f172a;
+      padding: 8px 12px 16px 12px;
+      min-height: 140mm;
+    }
+
+    .diagnosis-box {
+      margin-top: 24px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #64748b;
+      border-radius: 6px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    .diagnosis-box strong {
+      color: #0f172a;
+    }
+
+    /* Rodapé / Assinatura */
+    .prescription-footer {
+      margin-top: auto;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .date-location {
+      text-align: right;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      font-weight: 600;
+      margin-bottom: 45px;
+    }
+
+    .signatures-grid {
+      display: flex;
+      justify-content: space-around;
+      gap: 30px;
+      margin-bottom: 35px;
+    }
+
+    .signature-block {
+      text-align: center;
+      width: 260px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .signature-line {
+      border-bottom: 1.5px solid #1e293b;
+      margin-bottom: 8px;
+      height: 40px;
+    }
+
+    .doctor-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+    }
+
+    .doctor-crm {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .legal-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .auth-code {
+      font-family: monospace;
+      font-weight: 600;
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #334155;
+    }
+
+    /* OTIMIZAÇÃO RIGOROSA PARA IMPRESSÃO (A4) */
+    @media print {
+      body {
+        background-color: white !important;
+        color: #0f172a !important;
+      }
+
+      .print-toolbar {
+        display: none !important;
+      }
+
+      .paper-container {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .prescription-paper {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        height: auto !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+
+      .prescription-body {
+        min-height: auto !important;
+      }
+
+      .prescription-content {
+        min-height: 120mm !important;
+      }
+
+      .medical-header,
+      .patient-card,
+      .section-title,
+      .diagnosis-box,
+      .prescription-footer,
+      .signature-block {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 15mm 15mm 15mm 15mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Toolbar Superior (Apenas Tela) -->
+  <div class="print-toolbar">
+    <div class="toolbar-info">
+      <div class="icon-wrapper">
+        <i class="fas fa-file-prescription"></i>
+      </div>
+      <div>
+        <h2>Receita Médica Digital</h2>
+        <span>Atendimento #{{ atendimento.id }} — Emitido em {% now "d/m/Y H:i" %}</span>
+      </div>
+    </div>
+    
+    <div class="toolbar-tip">
+      <i class="fas fa-lightbulb"></i>
+      <span>Dica: Na janela de impressão do navegador, certifique-se de habilitar <strong>Gráficos de segundo plano</strong>.</span>
+    </div>
+
+    <div class="toolbar-actions">
+      <a href="{% url 'atendimento_detail' atendimento.pk %}" class="btn btn-back">
+        <i class="fas fa-arrow-left"></i> Voltar
+      </a>
+      <button type="button" class="btn btn-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir Receita
+      </button>
+    </div>
+  </div>
+
+  <!-- Container da Folha A4 -->
+  <div class="paper-container">
+    <div class="prescription-paper">
+
+      <div>
+        <!-- Cabeçalho -->
+        <header class="medical-header">
+          <div class="hospital-info">
+            <img src="{% static 'img/senai_logo.png' %}" alt="Logo" class="hospital-logo">
+            <div class="hospital-text">
+              <h1>{{ config.nome_hospital }}</h1>
+              <p>{{ config.subtitulo }}</p>
+            </div>
+          </div>
+          <div class="prescription-badge">
+            <h3>{{ config.titulo_documento }}</h3>
+            <span>{{ config.subtitulo_documento }}</span>
+          </div>
+        </header>
+
+        <!-- Identificação do Paciente -->
+        <section class="patient-card">
+          <div class="patient-grid">
+            <div class="patient-item">
+              <span class="patient-label">Paciente</span>
+              <span class="patient-value">{{ atendimento.triagem.paciente.nome }} {{ atendimento.triagem.paciente.sobrenome }}</span>
+            </div>
+            <div class="patient-item">
+              <span class="patient-label">CPF</span>
+              <span class="patient-value">{{ atendimento.triagem.paciente.cpf }}</span>
+            </div>
+            <div class="patient-item">
+              <span class="patient-label">Nascimento</span>
+              <span class="patient-value">{{ atendimento.triagem.paciente.data_nascimento|date:"d/m/Y" }}</span>
+            </div>
+          </div>
+
+          <div class="vitals-bar">
+            <div class="vital-item">
+              <i class="fas fa-heartbeat" style="color: var(--primary);"></i>
+              <span>Pressão Arterial: <strong>{{ atendimento.triagem.pressao_arterial }}</strong></span>
+            </div>
+            <div class="vital-item">
+              <i class="fas fa-wind" style="color: #0284c7;"></i>
+              <span>Saturação O₂: <strong>{{ atendimento.triagem.saturacao }}%</strong></span>
+            </div>
+            <div class="vital-item">
+              <i class="fas fa-weight" style="color: #475569;"></i>
+              <span>Peso: <strong>{{ atendimento.triagem.peso }} kg</strong></span>
+            </div>
+            <div class="vital-item" style="margin-left: auto;">
+              <span>Classificação:</span>
+              <strong style="text-transform: uppercase;">{{ atendimento.triagem.classificacao_risco.cor }}</strong>
+            </div>
+          </div>
+
+          {% if atendimento.triagem.alergias %}
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #cbd5e1; color: #b91c1c; font-size: 0.8rem; font-weight: 700;">
+            <i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i> ALERGIAS CONHECIDAS: {{ atendimento.triagem.alergias }}
+          </div>
+          {% endif %}
+        </section>
+
+        <!-- Prescrição -->
+        <section class="prescription-body">
+          <div class="section-title">
+            <div class="rx-symbol-badge">℞</div>
+            <span>Prescrição Médica</span>
+          </div>
+
+          <div class="prescription-content">
+            {{ atendimento.prescricao|linebreaksbr }}
+          </div>
+
+          {% if atendimento.diagnostico %}
+          <div class="diagnosis-box">
+            <i class="fas fa-info-circle" style="margin-right: 6px; color: #475569;"></i>
+            <strong>Diagnóstico:</strong> {{ atendimento.diagnostico }}
+          </div>
+          {% endif %}
+        </section>
+      </div>
+
+      <!-- Rodapé / Assinaturas -->
+      <footer class="prescription-footer">
+        <div class="date-location">
+          {{ config.local_emissao }}, {% now "d/m/Y" %} às {% now "H:i" %}
+        </div>
+
+        <div class="signatures-grid">
+          {% for medico in atendimento.medicos.all %}
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <div class="doctor-name">Dr(a). {{ medico.nome }} {{ medico.sobrenome }}</div>
+            <div class="doctor-crm">{{ medico.especialidade }} — CRM {{ medico.CRM }}</div>
+          </div>
+          {% empty %}
+          <div class="signature-block">
+            <div class="signature-line"></div>
+            <div class="doctor-name">Médico Responsável pelo Atendimento</div>
+            <div class="doctor-crm">Assinatura e Carimbo Médico</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="legal-footer">
+          <span>{{ config.rodape_legal }}</span>
+          <span class="auth-code">Chave: #ATD{{ atendimento.id }}-{% now "Ymd" %}</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+</body>
+</html>

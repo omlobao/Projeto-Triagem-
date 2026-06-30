@@ -12,187 +12,402 @@
 {% endblock %}
 
 {% block content %}
+<style>
+  .triage-section {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+  }
+  .triage-section:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .triage-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .triage-section-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .triage-section-title h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--slate-50);
+    margin: 0;
+  }
+  .triage-section-title p {
+    font-size: 0.8rem;
+    color: var(--slate-400);
+    margin: 2px 0 0;
+  }
+  
+  .vital-input-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    transition: all 0.2s ease;
+  }
+  .vital-input-card:focus-within {
+    border-color: var(--primary-400);
+    background: rgba(13, 148, 136, 0.05);
+  }
+  .vital-input-card label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--slate-300);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  .clinical-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .alert-checkbox-box {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.03));
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .alert-checkbox-box:hover {
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  .alert-checkbox-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .alert-checkbox-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .clinical-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
 <div class="page-header">
   <div>
-    <h1>{{ form_title|default:"Nova Triagem" }}</h1>
-    <p>Preencha os dados da triagem do paciente</p>
+    <h1>{{ form_title|default:"Protocolo de Triagem Médica" }}</h1>
+    <p>Registro de classificação de risco e avaliação multiprofissional</p>
   </div>
   <a href="{% url 'triagem_list' %}" class="btn btn-secondary" id="btn-voltar-triagens">
-    <i class="fas fa-arrow-left"></i> Voltar
+    <i class="fas fa-arrow-left"></i> Voltar à Lista
   </a>
 </div>
 
-<div class="card">
-  <div class="card-body">
-    <form method="post" class="django-form" id="form-triagem">
-      {% csrf_token %}
+<form method="post" class="django-form" id="form-triagem">
+  {% csrf_token %}
 
-      {% if form.errors %}
-      <div class="message message-error mb-2">
-        <i class="fas fa-exclamation-circle"></i>
-        Corrija os erros abaixo para continuar.
-      </div>
-      {% endif %}
-
-      <h3 style="color: var(--slate-100); margin-bottom: 16px; font-size: 0.9rem;">
-        <i class="fas fa-user" style="color: var(--primary-400); margin-right: 6px;"></i> Paciente e Responsável
-      </h3>
-      
-      <!-- Toggle buttons for Patient Mode -->
-      <div class="patient-mode-toggle mb-3" style="display: flex; gap: 8px; margin-bottom: 20px;">
-        <button type="button" class="btn btn-primary btn-sm" id="btn-paciente-existente">Paciente Existente</button>
-        <button type="button" class="btn btn-outline btn-sm" id="btn-paciente-novo">Novo Paciente</button>
-      </div>
-
-      <!-- Hidden field to control mode -->
-      <div style="display: none;">{{ form.paciente_novo }}</div>
-
-      <!-- Div for existing patient dropdown -->
-      <div id="paciente-existente-div" class="form-row">
-        <div class="form-group" style="flex: 1;">
-          <label for="id_paciente">Selecionar Paciente</label>
-          {{ form.paciente }}
-          {% if form.paciente.errors %}
-          <ul class="errorlist">{% for e in form.paciente.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Div for new patient fields -->
-      <div id="paciente-novo-div" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 16px; border-radius: 8px; border: 1px dashed var(--glass-border); margin-bottom: 20px;">
-        <h4 style="margin-bottom: 16px; font-size: 0.85rem; color: var(--primary-400);">Cadastrar Novo Paciente</h4>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="id_nome">Nome</label>
-            {{ form.nome }}
-            {% if form.nome.errors %}
-            <ul class="errorlist">{% for e in form.nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-          <div class="form-group">
-            <label for="id_sobrenome">Sobrenome</label>
-            {{ form.sobrenome }}
-            {% if form.sobrenome.errors %}
-            <ul class="errorlist">{% for e in form.sobrenome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="id_cpf">CPF</label>
-            {{ form.cpf }}
-            {% if form.cpf.errors %}
-            <ul class="errorlist">{% for e in form.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-          <div class="form-group">
-            <label for="id_data_nascimento">Data de Nascimento</label>
-            {{ form.data_nascimento }}
-            {% if form.data_nascimento.errors %}
-            <ul class="errorlist">{% for e in form.data_nascimento.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="id_numero_telefone">Telefone</label>
-            {{ form.numero_telefone }}
-            {% if form.numero_telefone.errors %}
-            <ul class="errorlist">{% for e in form.numero_telefone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-          <div class="form-group">
-            <label for="id_email">E-mail</label>
-            {{ form.email }}
-            {% if form.email.errors %}
-            <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="id_enfermeiro">Enfermeiro Responsável</label>
-          {{ form.enfermeiro }}
-          {% if form.enfermeiro.errors %}
-          <ul class="errorlist">{% for e in form.enfermeiro.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-      </div>
-
-      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
-        <i class="fas fa-heart" style="color: var(--danger); margin-right: 6px;"></i> Dados Vitais
-      </h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="id_peso">Peso (kg)</label>
-          {{ form.peso }}
-          {% if form.peso.errors %}
-          <ul class="errorlist">{% for e in form.peso.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-        <div class="form-group">
-          <label for="id_altura">Altura (m)</label>
-          {{ form.altura }}
-          {% if form.altura.errors %}
-          <ul class="errorlist">{% for e in form.altura.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-        <div class="form-group">
-          <label for="id_pressao_arterial">Pressão Arterial</label>
-          {{ form.pressao_arterial }}
-          {% if form.pressao_arterial.errors %}
-          <ul class="errorlist">{% for e in form.pressao_arterial.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-        <div class="form-group">
-          <label for="id_saturacao">Saturação (%)</label>
-          {{ form.saturacao }}
-          {% if form.saturacao.errors %}
-          <ul class="errorlist">{% for e in form.saturacao.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-      </div>
-
-      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
-        <i class="fas fa-notes-medical" style="color: var(--warning); margin-right: 6px;"></i> Avaliação Clínica
-      </h3>
-      <div class="form-group">
-        <label for="id_sintomas">Sintomas</label>
-        {{ form.sintomas }}
-        {% if form.sintomas.errors %}
-        <ul class="errorlist">{% for e in form.sintomas.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-      <div class="form-group">
-        <label for="id_observacoes">Observações</label>
-        {{ form.observacoes }}
-        {% if form.observacoes.errors %}
-        <ul class="errorlist">{% for e in form.observacoes.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <h3 style="color: var(--slate-100); margin: 24px 0 16px; font-size: 0.9rem;">
-        <i class="fas fa-exclamation-triangle" style="color: var(--risk-orange); margin-right: 6px;"></i> Classificação de Risco
-      </h3>
-      <div class="form-group">
-        <label for="id_classificacao_risco">Classificação</label>
-        {{ form.classificacao_risco }}
-        {% if form.classificacao_risco.errors %}
-        <ul class="errorlist">{% for e in form.classificacao_risco.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-        {% endif %}
-      </div>
-
-      <div class="card-footer" style="padding: 20px 0 0; border-top: 1px solid var(--glass-border); margin-top: 20px;">
-        <a href="{% url 'triagem_list' %}" class="btn btn-secondary">Cancelar</a>
-        <button type="submit" class="btn btn-primary" id="btn-salvar-triagem">
-          <i class="fas fa-save"></i> Salvar Triagem
-        </button>
-      </div>
-    </form>
+  {% if form.errors %}
+  <div class="message message-error mb-3">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>Corrija os campos em destaque abaixo antes de salvar a triagem.</span>
   </div>
-</div>
+  {% endif %}
+
+  <!-- 1. PACIENTE & ENFERMEIRO -->
+  <div class="triage-section" style="border-left: 4px solid var(--primary-400);">
+    <div class="triage-section-header">
+      <div class="triage-section-icon" style="background: rgba(13, 148, 136, 0.15); color: var(--primary-400);">
+        <i class="fas fa-user-check"></i>
+      </div>
+      <div class="triage-section-title">
+        <h3>Identificação do Paciente & Responsável</h3>
+        <p>Selecione o paciente em atendimento ou realize o cadastro instantâneo</p>
+      </div>
+    </div>
+
+    <!-- Toggle buttons for Patient Mode -->
+    <div class="patient-mode-toggle mb-3" style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <button type="button" class="btn btn-primary btn-sm" id="btn-paciente-existente">
+        <i class="fas fa-id-card"></i> Paciente Já Cadastrado
+      </button>
+      <button type="button" class="btn btn-outline btn-sm" id="btn-paciente-novo">
+        <i class="fas fa-user-plus"></i> Novo Paciente
+      </button>
+    </div>
+
+    <!-- Hidden field to control mode -->
+    <div style="display: none;">{{ form.paciente_novo }}</div>
+
+    <!-- Div for existing patient dropdown -->
+    <div id="paciente-existente-div" class="form-row">
+      <div class="form-group" style="flex: 1; margin-bottom: 0;">
+        <label for="id_paciente">Selecionar Paciente no Sistema</label>
+        {{ form.paciente }}
+        {% if form.paciente.errors %}
+        <ul class="errorlist">{% for e in form.paciente.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Div for new patient fields -->
+    <div id="paciente-novo-div" style="display: none; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: var(--radius-sm); border: 1px dashed var(--primary-500); margin-bottom: 20px;">
+      <h4 style="margin-bottom: 16px; font-size: 0.9rem; color: var(--primary-300); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-notes-medical"></i> Preenchimento de Novo Paciente
+      </h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_nome">Nome</label>
+          {{ form.nome }}
+          {% if form.nome.errors %}
+          <ul class="errorlist">{% for e in form.nome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_sobrenome">Sobrenome</label>
+          {{ form.sobrenome }}
+          {% if form.sobrenome.errors %}
+          <ul class="errorlist">{% for e in form.sobrenome.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="id_cpf">CPF</label>
+          {{ form.cpf }}
+          {% if form.cpf.errors %}
+          <ul class="errorlist">{% for e in form.cpf.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="id_data_nascimento">Data de Nascimento</label>
+          {{ form.data_nascimento }}
+          {% if form.data_nascimento.errors %}
+          <ul class="errorlist">{% for e in form.data_nascimento.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom: 0;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_numero_telefone">Telefone / WhatsApp</label>
+          {{ form.numero_telefone }}
+          {% if form.numero_telefone.errors %}
+          <ul class="errorlist">{% for e in form.numero_telefone.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="id_email">E-mail</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+          <ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row mt-3" style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 18px;">
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="id_enfermeiro" style="color: var(--slate-200);">Enfermeiro(a) Responsável pela Aferição</label>
+        {{ form.enfermeiro }}
+        {% if form.enfermeiro.errors %}
+        <ul class="errorlist">{% for e in form.enfermeiro.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SINAIS VITAIS -->
+  <div class="triage-section" style="border-left: 4px solid var(--danger);">
+    <div class="triage-section-header">
+      <div class="triage-section-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <div class="triage-section-title">
+        <h3>Sinais Vitais & Biometria</h3>
+        <p>Parâmetros fisiológicos medidos no momento da acolhida</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="vital-input-card">
+        <label for="id_pressao_arterial">
+          <i class="fas fa-tint" style="color: #ef4444;"></i> Pressão Arterial (mmHg)
+        </label>
+        {{ form.pressao_arterial }}
+        {% if form.pressao_arterial.errors %}
+        <ul class="errorlist">{% for e in form.pressao_arterial.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+      
+      <div class="vital-input-card">
+        <label for="id_saturacao">
+          <i class="fas fa-lungs" style="color: #38bdf8;"></i> Saturação de O₂ (%)
+        </label>
+        {{ form.saturacao }}
+        {% if form.saturacao.errors %}
+        <ul class="errorlist">{% for e in form.saturacao.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="vital-input-card">
+        <label for="id_peso">
+          <i class="fas fa-weight" style="color: #2dd4bf;"></i> Peso (kg)
+        </label>
+        {{ form.peso }}
+        {% if form.peso.errors %}
+        <ul class="errorlist">{% for e in form.peso.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="vital-input-card">
+        <label for="id_altura">
+          <i class="fas fa-ruler-vertical" style="color: #fbbf24;"></i> Altura (m)
+        </label>
+        {{ form.altura }}
+        {% if form.altura.errors %}
+        <ul class="errorlist">{% for e in form.altura.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. AVALIAÇÃO CLÍNICA & HISTÓRICO -->
+  <div class="triage-section" style="border-left: 4px solid var(--warning);">
+    <div class="triage-section-header">
+      <div class="triage-section-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--warning);">
+        <i class="fas fa-notes-medical"></i>
+      </div>
+      <div class="triage-section-title">
+        <h3>Avaliação Clínica & Histórico do Paciente</h3>
+        <p>Sintomas relatados, comorbidades e restrições medicamentosas</p>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="id_sintomas" style="font-size: 0.85rem; color: var(--slate-200);">
+        <i class="fas fa-head-side-cough" style="color: #fbbf24; margin-right: 6px;"></i> Sintomas Principalmente Relatados
+      </label>
+      {{ form.sintomas }}
+      {% if form.sintomas.errors %}
+      <ul class="errorlist">{% for e in form.sintomas.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div class="clinical-grid mt-2">
+      <div class="form-group">
+        <label for="id_alergias" style="font-size: 0.85rem; color: #fca5a5;">
+          <i class="fas fa-exclamation-circle" style="color: #ef4444; margin-right: 6px;"></i> Alergias ou Restrições Conhecidas
+        </label>
+        {{ form.alergias }}
+        {% if form.alergias.errors %}
+        <ul class="errorlist">{% for e in form.alergias.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="id_doencas_deficiencias" style="font-size: 0.85rem; color: var(--slate-200);">
+          <i class="fas fa-procedures" style="color: #38bdf8; margin-right: 6px;"></i> Doenças Pré-existentes ou Deficiências
+        </label>
+        {{ form.doencas_deficiencias }}
+        {% if form.doencas_deficiencias.errors %}
+        <ul class="errorlist">{% for e in form.doencas_deficiencias.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Alerta de Uso de Álcool e Drogas -->
+    <div class="alert-checkbox-box">
+      <div class="alert-checkbox-info">
+        <div class="alert-checkbox-icon">
+          <i class="fas fa-wine-bottle"></i>
+        </div>
+        <div>
+          <label for="id_utilizou_drogas" style="font-size: 0.95rem; font-weight: 700; color: #fecaca; margin: 0; cursor: pointer;">
+            Uso recente de Álcool ou Substâncias Ilícitas?
+          </label>
+          <p style="font-size: 0.78rem; color: #fca5a5; margin: 2px 0 0;">
+            Marque esta opção caso o paciente relate ou apresente sinais de intoxicação ou uso nas últimas 24 horas.
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: center; padding-left: 12px;">
+        {{ form.utilizou_drogas }}
+      </div>
+    </div>
+    {% if form.utilizou_drogas.errors %}
+    <ul class="errorlist">{% for e in form.utilizou_drogas.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <div class="form-group mt-2 mb-0">
+      <label for="id_observacoes" style="font-size: 0.85rem; color: var(--slate-300);">
+        <i class="fas fa-comment-medical" style="color: #a7f3d0; margin-right: 6px;"></i> Observações Adicionais da Enfermagem
+      </label>
+      {{ form.observacoes }}
+      {% if form.observacoes.errors %}
+      <ul class="errorlist">{% for e in form.observacoes.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 4. CLASSIFICAÇÃO DE RISCO -->
+  <div class="triage-section" style="border-left: 4px solid #f97316;">
+    <div class="triage-section-header">
+      <div class="triage-section-icon" style="background: rgba(249, 115, 22, 0.15); color: #f97316;">
+        <i class="fas fa-layer-group"></i>
+      </div>
+      <div class="triage-section-title">
+        <h3>Classificação de Risco (Manchester)</h3>
+        <p>Defina a prioridade clínica de atendimento com base no protocolo</p>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 0;">
+      <label for="id_classificacao_risco" style="font-size: 0.85rem; color: var(--slate-200);">Nível de Prioridade</label>
+      {{ form.classificacao_risco }}
+      {% if form.classificacao_risco.errors %}
+      <ul class="errorlist">{% for e in form.classificacao_risco.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card-footer" style="background: var(--glass-bg); border-radius: var(--radius-md); padding: 20px 24px; border: 1px solid var(--glass-border);">
+    <a href="{% url 'triagem_list' %}" class="btn btn-secondary">
+      <i class="fas fa-times"></i> Cancelar
+    </a>
+    <button type="submit" class="btn btn-primary" id="btn-salvar-triagem" style="padding: 12px 28px; font-size: 0.95rem;">
+      <i class="fas fa-check-circle"></i> Confirmar e Salvar Triagem
+    </button>
+  </div>
+</form>
 {% endblock %}
 
 {% block extra_js %}
@@ -204,7 +419,6 @@
     const divNovo = document.getElementById("paciente-novo-div");
     const inputNovo = document.getElementById("id_paciente_novo");
 
-    // Se houver erros no form que indicam que era um form de novo paciente, restaura o estado
     if (inputNovo && inputNovo.checked) {
       setNovo();
     }

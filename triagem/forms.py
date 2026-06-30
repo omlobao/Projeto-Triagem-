@@ -17,6 +17,16 @@ class TriagemForm(forms.ModelForm):
     class Meta:
         model = Triagem
         fields = '__all__'
+        widgets = {
+            'sintomas': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Descreva os sintomas relatados pelo paciente (ex: dor torácica, febre há 2 dias...)'}),
+            'alergias': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Ex: Penicilina, Dipirona, Frutos do mar (deixe em branco se não houver)'}),
+            'doencas_deficiencias': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Ex: Hipertensão, Diabetes, Asma, Deficiência motora...'}),
+            'observacoes': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Anotações complementares da enfermagem...'}),
+            'peso': forms.NumberInput(attrs={'placeholder': 'Ex: 72.5', 'step': '0.1'}),
+            'altura': forms.NumberInput(attrs={'placeholder': 'Ex: 1.75', 'step': '0.01'}),
+            'pressao_arterial': forms.TextInput(attrs={'placeholder': 'Ex: 120/80'}),
+            'saturacao': forms.NumberInput(attrs={'placeholder': 'Ex: 98'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -50,6 +60,10 @@ class AtendimentoForm(forms.ModelForm):
     class Meta:
         model = Atendimento
         fields = '__all__'
+        widgets = {
+            'diagnostico': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Descreva a avaliação clínica e hipótese diagnóstica...'}),
+            'prescricao': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Prescrição de medicamentos, posologia e exames...'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -13,6 +13,8 @@ from .forms import (
 )
 from cadastro.models import Paciente, Enfermeiro, Medico, ClassificacaoRisco
 from triagem.models import Triagem, Atendimento
+from .models import ConfiguracaoHospital
+from .forms import ConfiguracaoHospitalForm
 
 
 # ============================================
@@ -431,3 +433,27 @@ class ClassificacaoDeleteView(AdminRequiredMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Classificação excluída com sucesso!')
         return super().form_valid(form)
+
+
+# ============================================
+# Configuração Hospital / Receita
+# ============================================
+
+@admin_required
+def configuracao_hospital_update(request):
+    config = ConfiguracaoHospital.get_solo()
+    if request.method == 'POST':
+        form = ConfiguracaoHospitalForm(request.POST, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Configurações institucionais salvas com sucesso!')
+            return redirect('painel_configuracao_hospital')
+    else:
+        form = ConfiguracaoHospitalForm(instance=config)
+    
+    context = {
+        'form': form,
+        'form_title': 'Configurações do Hospital & Receita'
+    }
+    return render(request, 'painel/configuracao_hospital_form.html', context)
+

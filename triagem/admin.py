@@ -9,12 +9,16 @@ class TriagemAdmin(admin.ModelAdmin):
                     'pressao_arterial', 
                     'saturacao', 
                     'sintomas', 
+                    'alergias',
+                    'utilizou_drogas',
+                    'doencas_deficiencias',
                     'observacoes', 
                     'paciente', 
                     'enfermeiro', 
                     'classificacao_risco')
     list_filter = (
         'classificacao_risco',
+        'utilizou_drogas',
         'enfermeiro',
         'data_triagem',
     )
@@ -23,6 +27,8 @@ class TriagemAdmin(admin.ModelAdmin):
         'paciente__nome',
         'enfermeiro__nome',
         'sintomas',
+        'alergias',
+        'doencas_deficiencias',
         'observacoes',
     )
 

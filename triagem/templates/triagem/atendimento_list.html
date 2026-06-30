@@ -20,6 +20,62 @@
   </a>
 </div>
 
+<!-- Fila de Espera (Triagens Pendentes) -->
+<div class="card mb-3" style="border-left: 4px solid var(--warning);">
+  <div class="card-header" style="background: rgba(245,158,11,0.05);">
+    <h3><i class="fas fa-user-clock" style="margin-right: 8px; color: var(--warning);"></i> Fila de Espera — Atendimentos Pendentes</h3>
+    <span class="badge badge-orange">{{ triagens_pendentes|length }} paciente{% if triagens_pendentes|length != 1 %}s{% endif %} aguardando</span>
+  </div>
+  <div class="card-body" style="padding: 0;">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Triagem</th>
+            <th>Paciente</th>
+            <th>Classificação de Risco</th>
+            <th>Tempo Máx.</th>
+            <th>Sintomas</th>
+            <th>Chegada</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in triagens_pendentes %}
+          <tr>
+            <td class="text-muted">#{{ t.id }}</td>
+            <td>
+              <strong>{{ t.paciente.nome }} {{ t.paciente.sobrenome }}</strong>
+              <br><span class="text-muted text-sm">CPF: {{ t.paciente.cpf }}</span>
+            </td>
+            <td>
+              <span class="badge badge-{% if t.classificacao_risco.cor|lower == 'vermelho' or t.classificacao_risco.cor|lower == 'vermelha' %}red{% elif t.classificacao_risco.cor|lower == 'laranja' %}orange{% elif t.classificacao_risco.cor|lower == 'amarelo' or t.classificacao_risco.cor|lower == 'amarela' %}yellow{% elif t.classificacao_risco.cor|lower == 'verde' %}green{% elif t.classificacao_risco.cor|lower == 'azul' %}blue{% else %}teal{% endif %}">
+                <i class="fas fa-circle" style="font-size: 0.5rem;"></i> {{ t.classificacao_risco.cor }}
+              </span>
+            </td>
+            <td><strong>{{ t.classificacao_risco.tempo_max_atendimento }} min</strong></td>
+            <td>{{ t.sintomas|truncatechars:45 }}</td>
+            <td>{{ t.data_triagem|date:"d/m/Y" }}</td>
+            <td>
+              <a href="{% url 'atendimento_create' %}?triagem={{ t.id }}" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #0d9488, #0f766e);">
+                <i class="fas fa-stethoscope"></i> Iniciar Atendimento
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted" style="padding: 24px;">
+              <i class="fas fa-check-circle" style="color: var(--success); margin-right: 6px;"></i> Nenhum atendimento pendente no momento. Fila zerada!
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<h3 class="mb-2 mt-3" style="font-size: 1.1rem; color: var(--slate-300);"><i class="fas fa-history" style="margin-right: 8px; color: var(--slate-500);"></i> Histórico de Atendimentos Realizados</h3>
 <div class="card">
   <div class="card-body" style="padding: 0;">
     <div class="table-container">
@@ -61,6 +117,9 @@
             </td>
             <td>
               <div class="flex gap-2">
+                <a href="{% url 'atendimento_print' atendimento.pk %}" target="_blank" class="btn btn-ghost btn-sm" title="Imprimir Receita" style="color: var(--primary-400);">
+                  <i class="fas fa-print"></i>
+                </a>
                 <a href="{% url 'atendimento_detail' atendimento.pk %}" class="btn btn-ghost btn-sm" title="Ver">
                   <i class="fas fa-eye"></i>
                 </a>

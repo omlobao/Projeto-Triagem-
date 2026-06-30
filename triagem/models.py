@@ -15,6 +15,9 @@ class Triagem(models.Model):
     pressao_arterial = models.CharField(max_length=20)
     saturacao = models.IntegerField()
     sintomas = models.TextField()
+    alergias = models.TextField(blank=True, default='', verbose_name='Alergias')
+    utilizou_drogas = models.BooleanField(default=False, verbose_name='Utilizou álcool ou drogas?')
+    doencas_deficiencias = models.TextField(blank=True, default='', verbose_name='Doenças ou Deficiências')
     observacoes = models.TextField(blank=True)
     paciente = models.ForeignKey(
         Paciente,

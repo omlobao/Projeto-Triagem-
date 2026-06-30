@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User, Group
 from cadastro.models import Paciente, Enfermeiro, Medico, ClassificacaoRisco
+from .models import ConfiguracaoHospital
 
 
 # ============================================
@@ -198,3 +199,10 @@ class ClassificacaoRiscoForm(forms.ModelForm):
             'tempo_max_atendimento': 'Tempo Máximo de Atendimento (min)',
             'descricao': 'Descrição',
         }
+
+
+class ConfiguracaoHospitalForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoHospital
+        fields = '__all__'
+

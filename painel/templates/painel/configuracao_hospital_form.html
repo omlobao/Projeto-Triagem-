@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Configurações do Hospital & Receita{% endblock %}
+{% block topbar_title %}Configurações Institucionais{% endblock %}
+
+{% block breadcrumb %}
+<a href="{% url 'dashboard' %}">Início</a>
+<span class="separator">/</span>
+<a href="{% url 'painel_home' %}">Painel</a>
+<span class="separator">/</span>
+<span>Receita Médica</span>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1><i class="fas fa-hospital" style="color: var(--primary-400); margin-right: 8px;"></i> Configurações do Hospital & Receita</h1>
+    <p>Personalize os textos institucionais exibidos no cabeçalho e rodapé das receitas médicas impressas</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 720px;">
+  <div class="card-header">
+    <h3><i class="fas fa-file-prescription" style="margin-right: 8px; color: var(--primary-400);"></i> Dados Institucionais do Documento</h3>
+  </div>
+  <form method="post" class="django-form">
+    {% csrf_token %}
+    <div class="card-body">
+      {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <span class="form-help">{{ field.help_text }}</span>
+        {% endif %}
+        {{ field.errors }}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'painel_home' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Voltar
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Salvar Configurações
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
